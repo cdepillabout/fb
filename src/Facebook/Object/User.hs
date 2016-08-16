@@ -44,6 +44,7 @@ data User =
          , userVerified   :: Maybe Bool
          , userEmail      :: Maybe Text
          , userLocation   :: Maybe Place
+         , userBirthday   :: Maybe Text
          }
     deriving (Eq, Ord, Show, Read, Typeable)
 
@@ -60,6 +61,7 @@ instance A.FromJSON User where
            <*> v .:? "verified"
            <*> v .:? "email"
            <*> v .:? "location"
+           <*> v .:? "birthday"
     parseJSON _ = mzero
 
 
