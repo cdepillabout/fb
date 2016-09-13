@@ -41,7 +41,11 @@ module Facebook
     , UserId
     , Gender(..)
     , Picture(..)
+    , Photo(..)
+    , Photos(..)
+    , PlatformImageSource(..)
     , getUser
+    , getUserPhotosUploaded
     , searchUsers
     , getUserCheckins
     , Friend(..)

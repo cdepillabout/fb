@@ -1,9 +1,13 @@
 {-# LANGUAGE DeriveDataTypeable, FlexibleContexts, OverloadedStrings #-}
 module Facebook.Object.User
     ( Picture(..)
+    , Photos(..)
+    , Photo(..)
+    , PlatformImageSource(..)
     , User(..)
     , Gender(..)
     , getUser
+    , getUserPhotosUploaded
     , searchUsers
     , getUserCheckins
     , Friend(..)
@@ -40,6 +44,22 @@ data Picture =
             }
     deriving (Eq, Ord, Show, Read, Typeable)
 
+data Photos = Photos { photos :: [Photo] }
+    deriving (Eq, Ord, Show, Read, Typeable)
+
+data Photo =
+    Photo { photoId         :: Id
+          , photoImages     :: Maybe [PlatformImageSource]
+          }
+    deriving (Eq, Ord, Show, Read, Typeable)
+
+data PlatformImageSource =
+    PlatformImageSource { platformImageSourceHeight :: Int
+                        , platformImageSourceSource :: Text
+                        , platformImageSourceWidth  :: Int
+                        }
+    deriving (Eq, Ord, Show, Read, Typeable)
+
 data User =
     User { userId         :: UserId
          , userName       :: Maybe Text
@@ -64,6 +84,24 @@ instance A.FromJSON Picture where
               <*> v .:  "is_silhouette"
               <*> v .:  "url"
               <*> v .:? "width"
+    parseJSON _ = mzero
+
+instance A.FromJSON Photos where
+    parseJSON (A.Object o) = Photos <$> o .: "data"
+    parseJSON _ = mzero
+
+instance A.FromJSON Photo where
+    parseJSON (A.Object o) =
+      Photo <$> o .:  "id"
+            <*> o .:? "images"
+    parseJSON _ = mzero
+
+instance A.FromJSON PlatformImageSource where
+    parseJSON (A.Object o) =
+      PlatformImageSource
+        <$> o .: "height"
+        <*> o .: "source"
+        <*> o .: "width"
     parseJSON _ = mzero
 
 instance A.FromJSON User where
@@ -112,6 +150,15 @@ getUser :: (R.MonadResource m, MonadBaseControl IO m) =>
         -> FacebookT anyAuth m User
 getUser id_ query mtoken = getObject ("/" <> idCode id_) query mtoken
 
+getUserPhotosUploaded
+    :: (R.MonadResource m, MonadBaseControl IO m)
+    => UserId         -- ^ User ID or @\"me\"@.
+    -> [Argument]     -- ^ Arguments to be passed to Facebook. Probably should
+                      -- be something like @[("fields", "images")]@.
+    -> Maybe UserAccessToken -- ^ Optional user access token.
+    -> FacebookT anyAuth m Photos
+getUserPhotosUploaded id_ query mtoken =
+    getObject ("/" <> idCode id_ <> "/photos/uploaded") query mtoken
 
 -- | Search users by keyword.
 searchUsers :: (R.MonadResource m, MonadBaseControl IO m)
