@@ -79,7 +79,7 @@ library
     , cryptohash-cryptoapi == 0.1.*
     , data-default
     , exceptions
-    , http-conduit         >= 2.0     && < 2.2
+    , http-conduit         >= 2.0
     , http-types
     , lifted-base          >= 0.1     && < 0.3
     , monad-control
